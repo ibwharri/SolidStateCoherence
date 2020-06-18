@@ -95,6 +95,49 @@ def getDephasingOperator(L, direction):
 
     return D
 
+def getDephasingComponents(D):
+    Mu = np.zeros_like(D)
+    for i in range(4):
+        for j in range(4):
+            mu = np.kron(sigma[i,:,:], sigma[j,:,:] )
+            #prod = np.einsum('...im,mj->...ij', D, mu)
+            Mu[...,i,j] = np.einsum('...im,mi->...', D, mu)/4
+
+    return Mu
+
+def thermalisedOrbitalDephasingRate(H, L, kBT, direction):
+    direction = 1 if direction=='x' else( 2 if direction=='y' else 3) # Convert directino to int
+
+    E, V = np.linalg.eigh(H)
+    D = getDephasingOperator(L, direction)
+    Mu = getDephasingComponents(D)
+    shape = E.shape[0:-1]
+
+    # Get array of thermal matrices
+    rhoth = np.repeat(E[...,np.newaxis], 4, axis=-1)
+    rhoth = np.exp(-rhoth/kBT)
+    
+    # Only non-zero diagonal elements
+    ii = np.arange(0,4,dtype=np.int64)
+    ii = ii.reshape( (1,)*len(shape)+(4,1))
+    ii = np.tile(ii, shape+(1,4) )
+    jj = np.arange(0,4,dtype=np.int64)
+    jj = jj.reshape( (1,)*len(shape)+(1,4))
+    jj = np.tile(jj, shape+(4,1) )
+    rhoth[ ii != jj ] = 0
+
+    # Normalise
+    rhoth = rhoth/np.einsum('...ii->...',rhoth)[...,np.newaxis,np.newaxis]
+    
+    # Calculate orbital polarisation
+    muZI_th = np.einsum('...im,mi->...', rhoth, np.kron(z, I)/4 )
+
+    # Spin dephasing rate under thermalise orbital approximation
+    r = -np.real(Mu[...,0,direction] + Mu[...,3,direction]*muZI_th)
+    
+    return r
+    
+
 def test_degenerate(i,j,pairs):
     if pairs is None:
         return None
