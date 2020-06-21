@@ -10,7 +10,7 @@ sigma = np.array([I,x,y,z])
 hbz = -np.kron(I,z)
 hbx = -np.kron(I,x)
 hby = -np.kron(I,y)
-hsoc = -np.kron(y,z)
+hsoc = np.kron(y,z)
 hl = np.kron(y,I)
 hegx = np.kron(z,I)
 hegy = np.kron(x,I)
@@ -72,10 +72,12 @@ def getLindbladian(H, g, h, Delta, kBT, degenerate_pair = None):
                 gammaij = gammaij + 1 if i<j else gammaij
 
                 complementary_pair = test_degenerate(i,j,degenerate_pair)
+                #print((i,j), 'None' if complementary_pair is None else tuple(complementary_pair))
                 if complementary_pair is None:
                     L[...,i,j,i,j] = np.sqrt(2*np.pi*Deltaij*gammaij)*( gij*Sx[...,i,j] + hij*Sy[...,i,j] )
                 else:
-                    L[...,i,j,i,j] = np.sqrt(np.pi*Deltaij*gammaij)*( gij*Sx[...,i,j] + hij*Sy[...,i,j] + gij*Sx[...,complementary_pair[0],complementary_pair[1]] + hij*Sy[...,complementary_pair[0],complementary_pair[1]] )
+                    L[...,i,j,i,j] = np.sqrt(np.pi*Deltaij*gammaij)*( gij*Sx[...,i,j] + hij*Sy[...,i,j] )
+                    L[...,i,j, complementary_pair[0], complementary_pair[1] ] = np.sqrt(np.pi*Deltaij*gammaij)*( gij*Sx[...,complementary_pair[0], complementary_pair[1]] + hij*Sy[...,complementary_pair[0], complementary_pair[1]] )
             
     
     return L
@@ -108,7 +110,7 @@ def getDephasingComponents(D):
 def thermalisedOrbitalDephasingRate(H, L, kBT, direction):
     direction = 1 if direction=='x' else( 2 if direction=='y' else 3) # Convert directino to int
 
-    E, V = np.linalg.eigh(H)
+    E, _ = np.linalg.eigh(H)
     D = getDephasingOperator(L, direction)
     Mu = getDephasingComponents(D)
     shape = E.shape[0:-1]
@@ -162,3 +164,10 @@ def order_pair(i,j,pair):
 
 def n_th(E,kBT):
     return 1/(np.exp(E/kBT)-1)
+
+def Pi(m,n):
+    Pi = np.zeros((4,4))
+    Pi[m,n] = 1
+
+    return Pi
+
