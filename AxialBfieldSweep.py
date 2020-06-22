@@ -71,16 +71,23 @@ for j in range(2):
                 plt.ylabel('$T_{2,y}^{-1}$ (arb.)\n'+r'$\alpha$ (GHz)')
         else:
             plt.tick_params(left=False, labelleft=False)
+        if i==(Nangle-1):
+            plt.colorbar()
         plt.tick_params(bottom=False, labelbottom=False)
+
+dEmin = np.min(dE)
+dEmax = np.max(dE)
 
 # Plot qubit energy splitting
 for i in range(Nangle):
     ax = fig.add_subplot( spec[2,i] )
-    plt.imshow( dE[i, :, :], interpolation='bilinear', cmap='spring')
+    plt.imshow( dE[i, :, :], interpolation='bilinear', cmap='spring', vmax=dEmax, vmin=dEmin)
     if i ==0:
         plt.ylabel('$E_1-E_0$\n'+r'$\alpha$ (GHz)')
     else:
         plt.tick_params(left=False, labelleft=False)
+    if i==(Nangle-1):
+            plt.colorbar()
     plt.tick_params(bottom=False, labelbottom=False)
 
 # Plot corrected decoherence rates
@@ -101,6 +108,8 @@ for j in range(2):
             plt.xlabel(r'$\beta$ (GHz)')
         else:
             plt.tick_params(bottom=False, labelbottom=False)
+        if i==(Nangle-1):
+            plt.colorbar()
 
 # Plot T2 vs T1
 # Uncorrected
