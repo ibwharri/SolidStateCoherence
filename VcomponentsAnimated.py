@@ -50,22 +50,35 @@ Mu_min = np.real(np.min(Mu))
 Mu_max = np.real(np.max(Mu))
 
 fig = plt.figure()
-for angle in range(Nangle):
-    title = fig.suptitle('{0}={1:.1f}'.format(r'$\frac{1}{4}Tr(\sigma_i\otimes\sigma_jS), \theta$', theta[angle]*180/np.pi))
-    spec = gridspec.GridSpec(nrows = 4, ncols=4, figure=fig )
+def init(*args):
+    global imgs, angle, title
+    angle = 0
+    imgs = [1]*16
+    for angle in range(Nangle):
+        title = fig.suptitle('{0}={1:.1f}'.format(r'$\theta$', theta[angle]*180/np.pi))
+        spec = gridspec.GridSpec(nrows = 4, ncols=4, figure=fig )
+
+        for i in range(4):
+            for j in range(4):
+                ax = plt.subplot(spec[i,j])
+                imgs[i+4*j] = plt.imshow( np.real(Mu[angle,:,:,i,j]), animated=True, vmin = Mu_min, vmax = Mu_max )
+    
+    return tuple(imgs) + tuple([title])
+
+def updatefig(*args):
+    global Nangle, theta, angle, imgs, title
+    angle += 1
+    angle = angle%Nangle
+
+    
+    title.set_text('{0}={1:.1f}'.format(r'$\theta$', theta[angle]*180/np.pi))
+    
 
     for i in range(4):
         for j in range(4):
-            ax = plt.subplot(spec[i,j])
-            plt.imshow( np.real(Mu[angle,:,:,i,j]), animated=True, vmin = Mu_min, vmax = Mu_max, extent=[-max_strain, max_strain, -max_strain, max_strain] )
-            if j == 0:
-                plt.ylabel('i={}\n{}'.format(i,r'$\alpha$ (GHz)'))
-            else:
-                plt.tick_params(left=False, labelleft=False)
-            if i == 3:
-                plt.xlabel('{}\nj={}'.format(r'$\beta$ (GHz)',j))
-            else:
-                plt.tick_params(bottom=False, labelbottom=False)
+            imgs[i+4*j].set_array( np.real(Mu[angle,:,:,i,j]) )
     
+    return tuple(imgs) + tuple([title])
 
+ani = FuncAnimation(fig, updatefig, init_func=init, interval=50)
 plt.show()
