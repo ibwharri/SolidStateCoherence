@@ -59,7 +59,7 @@ spec = gridspec.GridSpec(ncols=Nangle, nrows=5, figure=fig)
 for j in range(2):
     for i in range(Nangle):
         ax = fig.add_subplot( spec[j,i] )
-        plt.imshow( r0[j, i, :, :], interpolation='bilinear', vmin=rmin, vmax=rmax )
+        plt.imshow( r0[j, i, :, :], interpolation='bilinear', vmin=rmin, vmax=rmax, extent=[-max_strain, max_strain, -max_strain, max_strain] )
         if j == 0:
             plt.title(r'$\theta=$' + '{0:.1f}'.format(theta[i]*180/np.pi) + r'$\deg$')
         if i == 0:
@@ -81,7 +81,7 @@ dEmax = np.max(dE)
 # Plot qubit energy splitting
 for i in range(Nangle):
     ax = fig.add_subplot( spec[2,i] )
-    plt.imshow( dE[i, :, :], interpolation='bilinear', cmap='spring', vmax=dEmax, vmin=dEmin)
+    plt.imshow( dE[i, :, :], interpolation='bilinear', cmap='spring', vmax=dEmax, vmin=dEmin, extent=[-max_strain, max_strain, -max_strain, max_strain])
     if i ==0:
         plt.ylabel('$E_1-E_0$\n'+r'$\alpha$ (GHz)')
     else:
@@ -94,7 +94,7 @@ for i in range(Nangle):
 for j in range(2):
     for i in range(Nangle):
         ax = fig.add_subplot( spec[j+3, i] )
-        plt.imshow( rcorr[j, i, :, :], interpolation='bilinear', vmin=rmin, vmax=rmax )
+        plt.imshow( rcorr[j, i, :, :], interpolation='bilinear', vmin=rmin, vmax=rmax, extent=[-max_strain, max_strain, -max_strain, max_strain] )
         if i == 0:
             if j == 0:
                 plt.ylabel('$T_1^{-1}$ (arb.)\n'+r'$\alpha$ (GHz)')
