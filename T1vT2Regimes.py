@@ -73,7 +73,7 @@ ax = plt.subplot(111)
 plt.scatter( T1rad[:,:,:].flatten(), T2rad[:,:,:].flatten(), s=3, label='$T_2^{-1}$' )
 xlim = np.array(ax.get_xlim())
 plt.plot( xlim, xlim/2, 'k--', label='$T_2^{-1}=(2T_1)^{-1}$', zorder=0 )
-plt.axhline( T2_poleffect, color='crimson', linestyle='--', label=r'Radial Field $T_2(B_z=0)$', zorder=0)
+plt.axhline( T2_poleffect, color='crimson', linestyle='--', label=r'Axial Field $T_2(B_z=0)$', zorder=0)
 plt.title('Radial')
 plt.legend()
 plt.xlabel('$T_1^{-1}$')
@@ -110,13 +110,13 @@ for i,kBT in enumerate(kBTs):
     plt.subplot(1, N_temp, i+1)
     plt.scatter( T1rad[:,:,:].flatten(), T2rad[:,:,:].flatten()/1e6, s=3, label='$T_2^{-1}$' )
     plt.plot( xlim, xlim/2e6, 'k--', label='$T_2^{-1}=(2T_1)^{-1}$', zorder=0 )
-    plt.axhline( T2_poleffect/1e6, color='crimson', linestyle='--', label=r'Radial Field $T_2(B_z=0)$', zorder=0)
+    plt.axhline( T2_poleffect/1e6, color='crimson', linestyle='--', label=r'Axial Field $T_2(B_z=0)$', zorder=0)
     plt.title('$k_BT=${0:.1f} GHz'.format(kBT))
     if i==0:
-        plt.ylabel('$T_2^{-1}x1e-6$ (arb.)')
+        plt.ylabel(r'$T_2^{-1}x10^{-6}$ (arb.)')
     #else:
         #plt.tick_params(left=False, labelleft=False)
-    if i==N_temp:
+    if i==N_temp-1:
         plt.legend()
     plt.xlabel('$T_1^{-1}$')
     
