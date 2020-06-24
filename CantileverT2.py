@@ -14,7 +14,7 @@ fgs = -1.7e6 # GHz
 
 # Plot alpha/beta as a function of strain
 # =======================================
-eps_max = 10e-5
+eps_max = 2e-5
 Npts = 200
 eps = np.linspace(-eps_max, eps_max, Npts)
 eps_cant = np.zeros((3,3))
@@ -26,7 +26,7 @@ theta_111 = np.arccos(2/np.sqrt(6))
 
 eps_110_1 = rotate_tensor(eps_cant, np.array([0,1,0]), theta_111, 2)
 axis = rotate_tensor(np.array([0,0,1]), np.array([0,1,0]), theta_111)
-eps_110_2 = rotate_tensor(eps_110_1, axis, -np.pi/2, 2)
+eps_110_2 = rotate_tensor(eps_110_1, axis, -np.pi/2-.0001, 2)
 eps_100_1 = rotate_tensor(eps_110_1, axis, -np.pi/4, 2)
 eps_100_2 = rotate_tensor(eps_110_1, axis, np.pi/4, 2)
 
@@ -34,8 +34,8 @@ eps_100_2 = rotate_tensor(eps_110_1, axis, np.pi/4, 2)
 alpha_110 = find_alpha(np.array([eps_110_1, eps_110_2]), dgs, fgs)
 alpha_100 = find_alpha(np.array([eps_100_1, eps_100_2]), dgs, fgs)
 alpha = np.array([alpha_110, alpha_100])
-beta_110 = find_alpha(np.array([eps_110_1, eps_110_2]), dgs, fgs)
-beta_100 = find_alpha(np.array([eps_100_1, eps_100_2]), dgs, fgs)
+beta_110 = find_beta(np.array([eps_110_1, eps_110_2]), dgs, fgs)
+beta_100 = find_beta(np.array([eps_100_1, eps_100_2]), dgs, fgs)
 beta = np.array([beta_110, beta_100])
 
 # Plot
@@ -60,7 +60,7 @@ plt.xlabel(r'$\epsilon \times 10^5$')
 plt.legend()
 
 # Find T2
-# =============================
+# ================================
 # Define magnetic field components
 B_aligned = np.array([0,1,0])
 B_misaligned = rotate_tensor(np.array([0,0,1]), np.array([0,1,0]), theta_111)
