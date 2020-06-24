@@ -139,7 +139,6 @@ def thermalisedOrbitalDephasingRate(H, L, kBT, direction):
     
     return r
     
-
 def test_degenerate(i,j,pairs):
     if pairs is None:
         return None
@@ -171,3 +170,38 @@ def Pi(m,n):
 
     return Pi
 
+def rotate_tensor(T, a, theta=None, order=1):
+    # Takes ...x3x... list of 3D tensors, T of rank order, and rotates them around axis defined by a. If rotation angle theta is not defined, angle of rotation is magnitude of a.
+
+    assert order<14, "Order of tensor is too high for numpy.einsum to handle"
+    
+    # Find rotation matrix
+    if theta is None:
+        theta = np.linalg.norm(a)
+
+    a = a/np.linalg.norm(a)
+
+    Cpm = np.array([[    0,   -a[2],  a[1]],
+                    [  a[2],     0  ,-a[0]],
+                    [ -a[1],   a[0],    0 ]])
+
+    Rn = np.cos(theta)*np.eye(3) + np.sin(theta)*Cpm + (1-np.cos(theta))*np.einsum('i,j->ij',a,a)
+
+    # Get subscript
+    letters = 'abcdefghijklmnopqrstuvwxyz'
+    subscript = [ letters[2*i:2*i+2] + ',' for i in range(int(order/2+1)) ]
+    subscript.append( '...' + letters[1:2*order+1:2]+'->' )
+    subscript.append( '...' + letters[:2*order:2] )
+    subscript = "".join(subscript)
+
+    # Get operands
+    op = [Rn]*order
+    op.append(T)
+
+    # Perform transformation
+    T_transformed = np.einsum(subscript, *op)
+
+    return T_transformed
+
+find_alpha = lambda epsilon, d, f: d*(epsilon[...,1,1]-epsilon[...,0,0]) - f*epsilon[...,2,0]
+find_beta = lambda epsilon, d, f: 2*d*(epsilon[...,0,1]) + f*epsilon[...,1,2]
