@@ -60,7 +60,7 @@ def find_coherence(B, alpha, beta, transition_pair=None):
     T1 = thermalisedOrbitalDephasingRate(H, L, kBT, 'z')
     T2 = thermalisedOrbitalDephasingRate(H, L, kBT, 'y')
 
-    return dE, T1, T2
+    return dE, np.log(T1)/np.log(10), np.log(T2)/np.log(10)
 
 # Plot
 fig = plt.figure()
@@ -81,6 +81,7 @@ ax_aligned_dE.set_xticklabels([
     r'$\langle 1\overline{1}0\rangle$',
     r'$\langle 0\overline{1}0\rangle$',
     r'$\langle\overline{1}\overline{1}0\rangle$'])
+ax_aligned_dE.set_ylabel('$E_1-E_0$\n'+'\n'+r'$\epsilon\times 10^5$')
 
 ax_misaligned_dE = plt.subplot(spec[0,1])
 ax_misaligned_dE.set_title(r'B 90$^\circ$ Misaligned', pad=36)
@@ -115,12 +116,14 @@ ax_z_dE.set_xticklabels([
 
 ax_aligned_T1 = plt.subplot(spec[1,0])
 ax_aligned_T1.tick_params(bottom=False, labelbottom=False)
+ax_aligned_T1.set_ylabel(r'$log(T_1^{-1})$'+'\n'+r'$\epsilon\times 10^5$')
 ax_misaligned_T1 = plt.subplot(spec[1,1])
 ax_misaligned_T1.tick_params(bottom=False, labelbottom=False, left=False, labelleft=False)
 ax_z_T1 = plt.subplot(spec[1,2])
 ax_z_T1.tick_params(bottom=False, labelbottom=False, left=False, labelleft=False)
 
 ax_aligned_T2 = plt.subplot(spec[2,0])
+ax_aligned_T2.set_ylabel(r'$log(T_2^{-1})$'+'\n'+r'$\epsilon\times 10^5$')
 ax_aligned_T2.set_xticks([-np.pi,-3*np.pi/4,-np.pi/2,-np.pi/4,0,np.pi/4,np.pi/2,3*np.pi/4,np.pi])
 ax_aligned_T2.set_xticklabels([
     r'$-\pi$',
