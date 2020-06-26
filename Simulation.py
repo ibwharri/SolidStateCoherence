@@ -132,7 +132,7 @@ def thermalisedOrbitalDephasingRate(H, L, kBT, direction):
     rhoth = rhoth/np.einsum('...ii->...',rhoth)[...,np.newaxis,np.newaxis]
     
     # Calculate orbital polarisation
-    muZI_th = np.einsum('...im,mi->...', rhoth, np.kron(z, I)/4 )
+    muZI_th = np.einsum('...im,mj->...', rhoth, np.kron(z, I)/4 )
 
     # Spin dephasing rate under thermalise orbital approximation
     r = -np.real(Mu[...,0,direction] + Mu[...,3,direction]*muZI_th)
