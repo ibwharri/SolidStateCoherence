@@ -84,8 +84,16 @@ plt.ylabel('$T_2^{-1}$')
 N_temp = 5
 kBTs = np.linspace(83.5, 1, N_temp)
 
-plt.figure()
-plt.tight_layout
+S = np.kron(z,I) + np.kron(x,I)
+_, U = np.linalg.eigh(S)
+
+figT1T2 = plt.figure()
+spec = gridspec.GridSpec(nrows=1, ncols=N_temp, figure=figT1T2)
+figDistT1 = plt.figure()
+specDistT1 = gridspec.GridSpec(nrows=1, ncols=N_temp, figure=figDistT1)
+figRT2 = plt.figure()
+specRT2 = gridspec.GridSpec(nrows=1, ncols=N_temp, figure=figRT2)
+
 for i,kBT in enumerate(kBTs):
     Bz = np.linspace(1e-3, 10, 10)
     H = h_total(lambda_soc, q_orb, Bz, 0, 0, 0, 0 )
@@ -99,26 +107,60 @@ for i,kBT in enumerate(kBTs):
 
     # Radial component
     H = h_total(lambda_soc, q_orb, 0, B[0,:,:,:], B[1,:,:,:], alpha, beta)
-    E = np.linalg.eigvalsh(H)
+    E, V = np.linalg.eigh(H)
     dE = (E[...,1]-E[...,0])
+
+    dist = basisSimilarity(U, V)
+    r = np.log10(phononPolarisationRatio(np.kron(z,I),np.kron(x,I),V))
 
     # Decoherence rate with degeneracy correction
     Lcorr = getLindbladian(H, g, h, Delta, kBT, np.array([[0,1],[2,3]]))
     T1rad = thermalisedOrbitalDephasingRate(H, Lcorr, kBT, 'z' )
     T2rad = thermalisedOrbitalDephasingRate(H, Lcorr, kBT, 'x')
 
-    plt.subplot(1, N_temp, i+1)
-    plt.scatter( T1rad[:,:,:].flatten(), T2rad[:,:,:].flatten()/1e6, s=3, label='$T_2^{-1}$' )
-    plt.plot( xlim, xlim/2e6, 'k--', label='$T_2^{-1}=(2T_1)^{-1}$', zorder=0 )
-    plt.axhline( T2_poleffect/1e6, color='crimson', linestyle='--', label=r'Axial Field $T_2(B_z=0)$', zorder=0)
-    plt.title('$k_BT=${0:.1f} GHz'.format(kBT))
+    # Plot T1 vs T2
+    plt.figure(3)
+    ax = plt.subplot(spec[0,i])
+    sc = ax.scatter( T1rad.flatten(), T2rad.flatten()/1e6, s=3, c=dist.flatten(), label='$T_2^{-1}$' )
+    ax.plot( xlim, xlim/2e6, 'k--', label='$T_2^{-1}=(2T_1)^{-1}$', zorder=0 )
+    ax.axhline( T2_poleffect/1e6, color='crimson', linestyle='--', label=r'Axial Field $T_2(B_z=0)$', zorder=0)
+    ax.set_title('$k_BT=${0:.1f} GHz'.format(kBT))
     if i==0:
-        plt.ylabel(r'$T_2^{-1}x10^{-6}$ (arb.)')
+        ax.set_ylabel(r'$T_2^{-1}x10^{-6}$ (arb.)')
+        ax.legend()
+    if i==N_temp-1:
+        plt.colorbar(sc, ax=ax)
+    
+    ax.set_xlabel('$T_1^{-1}$')
+
+    # Plot dist vs T1
+    plt.figure(4)
+    ax = plt.subplot(specDistT1[0,i])
+    ax.scatter( dist.flatten(), T1rad.flatten()/1e6, s=3 )
+    ax.set_title('$k_BT=${0:.1f} GHz'.format(kBT))
+    if i==0:
+        ax.set_ylabel(r'$T_1^{-1}x10^{-6}$ (arb.)')
+    
+    ax.set_xlabel('$||UV^\dag||_1$')
+
+    # Plot r vs T2
+    plt.figure(5)
+    ax = plt.subplot(specRT2[0,i])
+    sc = ax.scatter( dist.flatten(), T2rad.flatten()/1e6, s=3, c=dist.flatten(), label='$T_2^{-1}$' )
+    ax.axhline( T2_poleffect/1e6, color='crimson', linestyle='--', label=r'Axial Field $T_2(B_z=0)$', zorder=0)
+    ax.set_title('$k_BT=${0:.1f} GHz'.format(kBT))
+    if i==0:
+        ax.set_ylabel(r'$T_2^{-1}x10^{-6}$ (arb.)')
+        ax.legend()
     #else:
         #plt.tick_params(left=False, labelleft=False)
     if i==N_temp-1:
-        plt.legend()
-    plt.xlabel('$T_1^{-1}$')
+        plt.colorbar(sc, ax=ax)
     
+    ax.set_xlabel('$log(r)$')
+    
+
+plt.figure()
+plt.imshow(dist[0,:,:])
 
 plt.show()

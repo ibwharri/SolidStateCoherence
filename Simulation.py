@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from itertools import permutations
 
 x = np.array([[0,1],[1,0]])
 y = np.array([[0,-1j],[1j,0]])
@@ -138,7 +139,28 @@ def thermalisedOrbitalDephasingRate(H, L, kBT, direction):
     r = -np.real(Mu[...,0,direction] + Mu[...,3,direction]*muZI_th)
     
     return r
-    
+
+def basisSimilarity(U, V):
+    # Given two lists of unitaries U and V of size ...xmxm, returns maximum ||U.V^T|| for every possible permutation of the columns of U
+    prod = np.einsum( '...ji,...jk->...ik', np.conjugate(U), V )
+    sigma = np.einsum( '...ij->...', np.abs(prod))/prod.shape[-1]
+    return sigma
+
+def phononPolarisationRatio(Sx, Sy, V):
+    # Takes two polarised scattering matrices, and returns ratio of relative scattering rates of polarised phonons off 1 and 0 qubit states
+
+    rx = np.einsum('...ji,jk,...kl->...il', np.conjugate(V), Sx, V)
+    ry = np.einsum('...ji,jk,...kl->...il', np.conjugate(V), Sy, V)
+
+    r0x = rx[...,0,2]
+    r1x = rx[...,1,3]
+    r0y = ry[...,0,2]
+    r1y = ry[...,1,3]
+
+    r = np.abs(r0x*r1y/(r0y*r1x))**2
+
+    return r
+
 def test_degenerate(i,j,pairs):
     if pairs is None:
         return None
