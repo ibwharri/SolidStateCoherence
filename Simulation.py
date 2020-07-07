@@ -225,5 +225,5 @@ def rotate_tensor(T, a, theta=None, order=1):
 
     return T_transformed
 
-find_alpha = lambda epsilon, d, f: d*(epsilon[...,0,0]-epsilon[...,1,1])
-find_beta = lambda epsilon, d, f: 2*d*(epsilon[...,0,1])
+find_alpha = lambda epsilon, d, f: d*(epsilon[...,0,0]-epsilon[...,1,1]) + f*epsilon[...,2,0]
+find_beta = lambda epsilon, d, f: -2*d*(epsilon[...,0,1])  + f*epsilon[...,1,2]
