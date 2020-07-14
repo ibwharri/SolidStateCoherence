@@ -13,7 +13,7 @@ hbx = -np.kron(I,x)
 hby = -np.kron(I,y)
 hsoc = np.kron(y,z)
 hl = np.kron(y,I)
-hegx = np.kron(z,I)
+hegx = -np.kron(z,I)
 hegy = np.kron(x,I)
 
 def h_total(l, q, bz, bx, by, alpha, beta):
@@ -49,7 +49,7 @@ def getLindbladian(H, g, h, Delta, kBT, degenerate_pair = None):
     E, V = np.linalg.eigh(H)
 
 
-    Sx = np.kron(z, I)*np.ones_like(H)
+    Sx = -np.kron(z, I)*np.ones_like(H)
     Sx = np.einsum('...ji,...jk,...kl->...il', np.conjugate(V), Sx, V)
     Sy = np.kron(x, I)*np.ones_like(H)
     Sy = np.einsum('...ji,...jk,...kl->...il', np.conjugate(V), Sy, V)
@@ -109,10 +109,17 @@ def getDephasingComponents(D):
     return Mu
 
 def thermalisedOrbitalDephasingRate(H, L, kBT, direction):
+    # Evalutes the relaxation rate along a direction given by direction for a list of Hamiltonians of shape ...xNxN, at a thermal energy given by kBT, and Lindbladians of shape ...xNxNxNxNgiven by L under assumption that the orbital degree of freedom. L may be a list of arrays of shape ...xNxNxNxN, in which case the contributions of all operators in the last will be added together.
+
     direction = 1 if direction=='x' else( 2 if direction=='y' else 3) # Convert directino to int
 
     E, _ = np.linalg.eigh(H)
-    D = getDephasingOperator(L, direction)
+    if isinstance(L, list):
+        L = np.array(L)
+        D = getDephasingOperator(L, direction)
+        D = np.einsum('i...kn->...kn', D)
+    else:
+        D = getDephasingOperator(L, direction)
     Mu = getDephasingComponents(D)
     shape = E.shape[0:-1]
 

@@ -5,6 +5,7 @@ from Simulation import *
 
 g = lambda omega: np.sqrt(omega)
 h = lambda omega: np.sqrt(omega)
+zero = lambda omega: 0*omega
 Delta = lambda omega: omega**2
 kBT = 83.5 # GHz
 lambda_soc = 45/2 # GHz
@@ -15,8 +16,8 @@ fgs = -1.7e6 # GHz
 # Plot alpha/beta as a function of strain
 # =======================================
 eps_max = 10e-5
-Npts = 300
-Nangle = 300
+Npts = 200
+Nangle = 200
 eps = np.linspace(-eps_max, eps_max, Npts)
 theta = np.linspace(-np.pi, np.pi, Nangle)
 eps_cant = np.zeros((3,3))
@@ -49,18 +50,20 @@ B_aligned = np.array([0,1,0])
 B_misaligned = rotate_tensor(np.array([0,0,1]), np.array([0,1,0]), theta_111)
 B_z = rotate_tensor(np.array([0,0,1]), np.array([0,1,0]), np.arccos(1/np.sqrt(3)))
 
-def find_coherence(B, alpha, beta, transition_pair=None):
+def find_coherence(B, alpha, beta, g_phonon, h_phonon, transition_pair=None):
     H = h_total(lambda_soc, q_orb, B[2], B[0], B[1], alpha, beta)
     E = np.linalg.eigvalsh(H)
     dE = (E[...,1]-E[...,0])
 
     # Decoherence rate without degeneracy correction
-    L = getLindbladian( H, g, h, Delta, kBT, transition_pair)
+    LEgx = getLindbladian( H, g_phonon, zero, Delta, kBT, transition_pair)
+    LEgy = getLindbladian( H, zero, h_phonon, Delta, kBT, transition_pair)
+    L = [LEgx, LEgy]
     #T1_0 = thermalisedOrbitalDephasingRate(H, L0, kBT, 'z' )
     T1 = thermalisedOrbitalDephasingRate(H, L, kBT, 'z')
     T2 = thermalisedOrbitalDephasingRate(H, L, kBT, 'y')
 
-    return dE, np.log(T1)/np.log(10), np.log(T2)/np.log(10)
+    return dE, np.log10(T1), np.log10(T2)
 
 # Plot
 fig = plt.figure()
@@ -165,9 +168,9 @@ ax_z_T2.set_xticklabels([
     r'$\pi$'])
 
 # Aligned 110
-dE_aligned, T1_aligned, T2_aligned = find_coherence(B_aligned, alpha, beta, np.array([[0,1],[2,3]]))
-dE_misaligned, T1_misaligned, T2_misaligned = find_coherence(B_misaligned, alpha, beta, None)
-dE_z, T1_z, T2_z = find_coherence(B_z, alpha, beta, None)
+dE_aligned, T1_aligned, T2_aligned = find_coherence(B_aligned, alpha, beta, g, h, np.array([[0,1],[2,3]]))
+dE_misaligned, T1_misaligned, T2_misaligned = find_coherence(B_misaligned, alpha, beta, g, h, None)
+dE_z, T1_z, T2_z = find_coherence(B_z, alpha, beta, g, h, None)
 
 dE_max = np.max( np.array([dE_aligned, dE_misaligned, dE_z]) )
 T_max = np.max( np.array([T1_aligned, T1_misaligned, T1_z, T2_aligned, T2_misaligned, T2_z]) )

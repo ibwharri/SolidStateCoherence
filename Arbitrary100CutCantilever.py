@@ -5,6 +5,7 @@ from Simulation import *
 
 g = lambda omega: np.sqrt(omega)
 h = lambda omega: np.sqrt(omega)
+zero = lambda omega: 0*omega
 Delta = lambda omega: omega**2
 kBT = 83.5 # GHz
 lambda_soc = 45/2 # GHz
@@ -28,7 +29,7 @@ theta_111 = np.arccos(2/np.sqrt(6))
 
 #eps_110 = rotate_tensor(eps_cant, np.array([0,1,0]), theta_111, 2)
 #axis = rotate_tensor(np.array([0,0,1]), np.array([0,1,0]), theta_111)
-eps_110 = np.array(eps_cant)
+eps_110 = eps_cant.copy()
 axis = np.array([0,0,1])
 eps_cant = np.array([rotate_tensor(eps_110, axis, -angle, 2) for angle in theta])
 eps_cant = np.einsum('i,jkl->ijkl', eps, eps_cant)

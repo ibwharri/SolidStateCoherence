@@ -5,8 +5,9 @@ from Simulation import *
 
 g = lambda omega: np.sqrt(omega)
 h = lambda omega: np.sqrt(omega)
+zero = lambda omega: 0*omega
 Delta = lambda omega: omega**2
-kBT = 83.5 # GHz
+kBT = .835 # GHz
 lambda_soc = 45/2 # GHz
 q_orb = .1
 
@@ -36,14 +37,18 @@ E, _ = np.linalg.eigh(H)
 dE = (E[...,1]-E[...,0])
 
 # Decoherence rate without degeneracy correction
-L0 = getLindbladian(H, g, h, Delta, kBT)
+L0_Egx = getLindbladian(H, g, zero, Delta, kBT)
+L0_Egy = getLindbladian(H, zero, h, Delta, kBT)
+L0 = [L0_Egx, L0_Egy]
 T1_0 = thermalisedOrbitalDephasingRate(H, L0, kBT, 'z' )
 T2_x_0 = thermalisedOrbitalDephasingRate(H, L0, kBT, 'x')
 T2_y_0 = thermalisedOrbitalDephasingRate(H, L0, kBT, 'y')
 r0 = np.array([T1_0, T2_x_0, T2_y_0])
 
 # Decoherence rate with degeneracy correction
-Lcorr = getLindbladian(H, g, h, Delta, kBT, np.array([[0,1],[2,3]]))
+Lcorr_Egx = getLindbladian(H, g, zero, Delta, kBT, np.array([[0,1],[2,3]]))
+Lcorr_Egy = getLindbladian(H, zero, h, Delta, kBT, np.array([[0,1],[2,3]]))
+Lcorr = [Lcorr_Egx, Lcorr_Egy]
 T1_corr = thermalisedOrbitalDephasingRate(H, Lcorr, kBT, 'z' )
 T2_x_corr = thermalisedOrbitalDephasingRate(H, Lcorr, kBT, 'x')
 T2_y_corr = thermalisedOrbitalDephasingRate(H, Lcorr, kBT, 'y')
@@ -162,7 +167,8 @@ plt.ylabel(r'$1/T_2$ (arb.)')
 # Plot decoherence components for a given angle
 angle = 0
 for direction in ['x','z']:
-    D = getDephasingOperator(Lcorr, direction)
+    D = getDephasingOperator(np.array(Lcorr), direction)
+    D = np.einsum('i...kn->...kn', D)
     Mu = getDephasingComponents(D)
     Mu_min = np.real(np.min(Mu))
     Mu_max = np.real(np.max(Mu))
